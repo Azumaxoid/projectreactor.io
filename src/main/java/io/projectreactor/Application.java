@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
+import com.newrelic.api.agent.Trace;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.AsciiString;
@@ -105,8 +106,8 @@ public final class Application {
 		                    .port(8080)
 		                    .route(r -> r.file("/favicon.ico", contentPath.resolve("favicon.ico"))
 		                                 .get("/", template("home"))
-		                                 .get("/docs", template("docs"))
-		                                 .get("/learn", template("learn"))
+		                                 .get("/docs", docsTemplate("docs"))
+		                                 .get("/learn", learnTemplate("learn"))
 		                                 //.get("/project", template("project"))
 		                                 .get("/docs/{module}", this::listVersionsAndDocs)
 		                                 .get("/docs/", rewrite("docs/", "docs"))
@@ -153,16 +154,109 @@ public final class Application {
 		return (req, resp) -> resp.sendRedirect(req.uri().replace(originalPath, newPath));
 	}
 
-	private BiFunction<HttpServerRequest, HttpServerResponse, Publisher<Void>> template(
+	private BiFunction<HttpServerRequest, HttpServerResponse, Publisher<Void>> docsTemplate(
 			String templateName) {
-
 		//the template parsing happens at app's initialization
 		long start = System.nanoTime();
 		final String content = templateEngine.process(templateName, new Context(Locale.US, docsModel));
 		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 		LOGGER.info("Parsed template {} in {}ms", templateName, duration);
 
-		return (req, resp) -> resp.sendString(Mono.just(content));
+		return (req, resp) -> docs(req, resp, content);
+	}
+
+	private Publisher<Void> docs(HttpServerRequest req, HttpServerResponse resp, String content) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return wait(req, resp, content);
+	}
+
+	private BiFunction<HttpServerRequest, HttpServerResponse, Publisher<Void>> learnTemplate(
+			String templateName) {
+		//the template parsing happens at app's initialization
+		long start = System.nanoTime();
+		final String content = templateEngine.process(templateName, new Context(Locale.US, docsModel));
+		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+		LOGGER.info("Parsed template {} in {}ms", templateName, duration);
+
+		return (req, resp) -> learn(req, resp, content);
+	}
+
+	private Publisher<Void> learn(HttpServerRequest req, HttpServerResponse resp, String content) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return wait(req, resp, content);
+	}
+	private BiFunction<HttpServerRequest, HttpServerResponse, Publisher<Void>> template(
+			String templateName) {
+		//the template parsing happens at app's initialization
+		long start = System.nanoTime();
+		final String content = templateEngine.process(templateName, new Context(Locale.US, docsModel));
+		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+		LOGGER.info("Parsed template {} in {}ms", templateName, duration);
+
+		return (req, resp) -> wait(req, resp, content);
+	}
+
+	@Trace
+	private Publisher<Void> wait(HttpServerRequest req, HttpServerResponse resp, String content) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return wait2(req, resp, content);
+	}
+
+	@Trace
+	private Publisher<Void> wait2(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait3(req, resp, content);
+	}
+
+	@Trace
+	private Publisher<Void> wait3(HttpServerRequest req, HttpServerResponse resp, String content) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return wait4(req, resp, content);
+	}
+
+	@Trace
+	private Publisher<Void> wait4(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait5(req, resp, content);
+	}
+
+
+	private Publisher<Void> wait5(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait6(req, resp, content);
+	}
+
+	private Publisher<Void> wait6(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait7(req, resp, content);
+	}
+
+	private Publisher<Void> wait7(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait8(req, resp, content);
+	}
+
+	private Publisher<Void> wait8(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait9(req, resp, content);
+	}
+
+	private Publisher<Void> wait9(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return wait10(req, resp, content);
+	}
+
+	private Publisher<Void> wait10(HttpServerRequest req, HttpServerResponse resp, String content) {
+		return resp.sendString(Mono.just(content));
 	}
 
 	private BiFunction<HttpServerRequest, HttpServerResponse, Publisher<Void>> pageNotFound() {

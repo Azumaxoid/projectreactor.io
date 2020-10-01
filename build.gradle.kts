@@ -26,6 +26,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "4.0.4"
     id("com.github.salomonbrys.gradle.sass") version "1.2.0"
+    id("de.undercouch.download") version "3.4.3"
 }
 
 group = "io.projectreactor"
@@ -33,6 +34,7 @@ version = "1.0.0.BUILD-SNAPSHOT"
 
 configure<ApplicationPluginConvention> {
 	mainClassName = "io.projectreactor.Application"
+    applicationDefaultJvmArgs = listOf("-javaagent:/Users/tazuma/develop/github/Azumaxoid/projectreactor.io/newrelic/newrelic.jar")
 }
 
 configure<ShadowExtension> {
@@ -59,12 +61,24 @@ dependencies {
     compile("org.thymeleaf:thymeleaf:3.0.9.RELEASE")
     compile("org.yaml:snakeyaml:1.17")
     compile("com.fasterxml.jackson.core:jackson-databind:2.10.1")
+    compile("com.newrelic.agent.java:newrelic-agent:6.0.0")
+    compile("com.newrelic.agent.java:newrelic-api:6.0.0")
     runtime("commons-logging:commons-logging:1.2")
     runtime("org.slf4j:slf4j-api:1.7.21")
     runtime("ch.qos.logback:logback-classic:1.1.7")
-
     testCompile("junit:junit:4.12")
     testCompile("org.assertj:assertj-core:3.15.0")
+}
+
+tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadNewrelic") {
+    mkdir("newrelic")
+    src("https://download.newrelic.com/newrelic/java-agent/newrelic-agent/6.0.0/newrelic-java.zip")
+    dest(file("newrelic"))
+}
+
+tasks.register<Copy>("unzipNewrelic") {
+    from(zipTree (file("newrelic/newrelic-java.zip")))
+    into(rootDir)
 }
 
 val processResources = tasks.getByName("processResources")
